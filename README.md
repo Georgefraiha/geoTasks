@@ -14,6 +14,8 @@
 
 ## [Live Demo](https://geo-tasks.vercel.app)
 
-# Log in user: user1@geo.com
-# pass: user1@123
+### Log in user: user1@geo.com
+### pass: user1@123
 
+![preview image 1](https://raw.githubusercontent.com/Georgefraiha/geoTasks/main/screenshots/Login.png)
+![preview image 1](https://raw.githubusercontent.com/Georgefraiha/geoTasks/main/screenshots/Tasks.png)
