@@ -12,8 +12,8 @@
 ## yarn install
 ## yarn start
 
-## [Live Demo](geo-tasks.vercel.app)
+## [Live Demo](https://geo-tasks.vercel.app)
 
-Log in user: user1@geo.com
-pass: user1@123
+# Log in user: user1@geo.com
+# pass: user1@123
 
