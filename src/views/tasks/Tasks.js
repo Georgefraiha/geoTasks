@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 import {
   CCard,
@@ -15,17 +15,12 @@ import {
   CDropdownMenu,
   CDropdownItem,
   CFormInput,
-  CFormLabel,
-  CForm,
-  CButton,
-  CDropdownDivider,
 } from '@coreui/react'
 
-import { useState, useEffect, useRef } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import CIcon from '@coreui/icons-react'
 import { db, auth } from '../../firebase.config'
-import { cilTask, cibAddthis, cilSortNumericDown, cilChevronCircleDownAlt } from '@coreui/icons'
+import { cilTask, cibAddthis, cilSortNumericDown } from '@coreui/icons'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -38,16 +33,27 @@ const Tasks = () => {
   const [searchField, setSearch] = useState('AssignedTo')
   const [operator, setOperator] = useState('!=')
   const [searchValue, setValue] = useState('')
-
-  const [sortedby, setSortedBy] = useState(null)
+  const [searchText, setDesc] = useState('')
+  const [sortedby, setSortedBy] = useState('')
   const navigate = useNavigate()
   const isMounted = useRef(true)
   const [userList, setUserList] = useState([])
+
   const onClick1 = (field, value, op) => {
     setSearch(field)
     setValue(value)
     setOperator(op)
+    setSortedBy('')
     console.log(field + op + value)
+  }
+
+  const handleChange = (e) => {
+    setDesc(e.target.value)
+    setValue(searchText)
+    setSortedBy('')
+    setSearch('Description')
+    setOperator('==')
+    console.log(searchField + operator + searchValue)
   }
   useEffect(() => {
     if (isMounted) {
@@ -76,14 +82,13 @@ const Tasks = () => {
         const listingsRef = collection(db, 'tasks')
         var q
         // Create a query
-        sortedby
-          ? (q = query(
-              listingsRef,
-              orderBy(sortedby, 'asc'),
-              where(searchField, operator, searchValue),
-            ))
-          : (q = query(listingsRef, where(searchField, operator, searchValue)))
+        if (sortedby !== '') q = query(listingsRef, orderBy(sortedby, 'desc'))
+        else {
+          q = query(listingsRef, where(searchField, operator, searchValue))
+          console.log('not sorted' + sortedby)
+        }
 
+        // searchText ? where(searchField, '>=', searchValue) : '',
         // Execute query
         const querySnap = await getDocs(q)
 
@@ -141,14 +146,14 @@ const Tasks = () => {
   }, [])
 
   return (
-    <>
+    <div className="min-vh-400">
       <CRow>
         <CCol>
           <CCard>
             <CCardBody>
               <br />
 
-              <CTable align="middle" className="mb-0 border" hover responsive>
+              <CTable align="middle" className="mb-0 border min-vh-400" hover responsive>
                 <CTableHead color="light">
                   <CTableRow>
                     <CTableHeaderCell>
@@ -157,10 +162,15 @@ const Tasks = () => {
                     <CTableHeaderCell>TASKID</CTableHeaderCell>
                     <CTableHeaderCell>
                       DESC
-                      <CDropdown autoClose="outside">
+                      <CDropdown autoClose="outside" direction="dropend">
                         <CDropdownToggle color="secondary" size="sm" />
                         <CDropdownMenu>
-                          <CFormInput type="text" id="statusSearch" />
+                          <CFormInput
+                            type="text"
+                            id="descSearch"
+                            value={searchText}
+                            onChange={handleChange}
+                          />
                         </CDropdownMenu>
                       </CDropdown>
                     </CTableHeaderCell>
@@ -168,19 +178,31 @@ const Tasks = () => {
                       STATUS{' '}
                       <CIcon
                         icon={cilSortNumericDown}
-                        onClick={() => setSortedBy('status')}
+                        onClick={() => {
+                          setSortedBy('')
+                          setSortedBy('status')
+                        }}
                         cursor="pointer"
                       />{' '}
-                      <CDropdown>
+                      <CDropdown direction="dropend">
                         <CDropdownToggle color="secondary" size="sm" />
                         <CDropdownMenu>
-                          <CDropdownItem onClick={() => onClick1('status', 3, '!=')}>
+                          <CDropdownItem
+                            onClick={() => onClick1('status', 3, '!=')}
+                            cursor="pointer"
+                          >
                             All
                           </CDropdownItem>
-                          <CDropdownItem onClick={() => onClick1('status', 0, '==')}>
+                          <CDropdownItem
+                            onClick={() => onClick1('status', 0, '==')}
+                            cursor="pointer"
+                          >
                             Pending
                           </CDropdownItem>
-                          <CDropdownItem onClick={() => onClick1('status', 1, '==')}>
+                          <CDropdownItem
+                            onClick={() => onClick1('status', 1, '==')}
+                            cursor="pointer"
+                          >
                             Completed
                           </CDropdownItem>
                         </CDropdownMenu>
@@ -190,19 +212,26 @@ const Tasks = () => {
                       User{' '}
                       <CIcon
                         icon={cilSortNumericDown}
-                        onClick={() => setSortedBy('AssignedTo')}
+                        onClick={() => {
+                          setSortedBy('')
+                          setSortedBy('AssignedTo')
+                        }}
                         cursor="pointer"
                       />{' '}
-                      <CDropdown>
+                      <CDropdown direction="dropend" cursor="pointer">
                         <CDropdownToggle color="secondary" size="sm" />
                         <CDropdownMenu>
-                          <CDropdownItem onClick={() => onClick1('AssignedTo', 1000, '!=')}>
-                            All Accounts
+                          <CDropdownItem
+                            onClick={() => onClick1('AssignedTo', 1000, '!=')}
+                            cursor="pointer"
+                          >
+                            <span cursor="pointer">All Accounts</span>
                           </CDropdownItem>
                           {userList.map((listing) => (
                             <CDropdownItem
                               key={listing.id}
                               onClick={() => onClick1('AssignedTo', listing.id, '==')}
+                              cursor="pointer"
                             >
                               {listing.data.email}
                             </CDropdownItem>
@@ -228,7 +257,7 @@ const Tasks = () => {
           </CCard>
         </CCol>
       </CRow>
-    </>
+    </div>
   )
 }
 
