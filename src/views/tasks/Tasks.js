@@ -30,7 +30,7 @@ import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 // import { useTable, useGlobalFilter, useFilters } from 'react-table'
-import { collection, getDocs, query, limit } from 'firebase/firestore'
+import { collection, getDocs, query, limit, orderBy } from 'firebase/firestore'
 import ListingItem from 'src/components/ListingItem'
 
 const Tasks = () => {
@@ -38,10 +38,11 @@ const Tasks = () => {
   const [descSearch, setDecSearch] = useState('')
   const [statusSearch, setStatSearch] = useState('')
   const [userSearch, setUserSearch] = useState('')
-  const [sortedby, setSortedBy] = useState('')
+  const [sortedby, setSortedBy] = useState()
   const navigate = useNavigate()
   const isMounted = useRef(true)
   const [userList, setUserList] = useState([])
+
   useEffect(() => {
     if (isMounted) {
       try {
@@ -67,9 +68,10 @@ const Tasks = () => {
       try {
         // Get reference
         const listingsRef = collection(db, 'tasks')
-
+        var q
         // Create a query
-        const q = query(listingsRef, limit(10))
+        if (sortedby === 'status') q = query(listingsRef, orderBy('status', 'asc'))
+        else q = query(listingsRef)
 
         // Execute query
         const querySnap = await getDocs(q)
@@ -95,7 +97,7 @@ const Tasks = () => {
     }
 
     fetchListings()
-  }, [])
+  }, [sortedby])
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -104,7 +106,7 @@ const Tasks = () => {
         const listingsRef = collection(db, 'users')
 
         // Create a query
-        const q = query(listingsRef, limit(10))
+        const q = query(listingsRef)
 
         // Execute query
         const querySnap = await getDocs(q)
@@ -125,7 +127,7 @@ const Tasks = () => {
       } catch (error) {}
     }
     fetchUsers()
-  })
+  }, [])
 
   return (
     <>
@@ -152,7 +154,12 @@ const Tasks = () => {
                       </CDropdown>
                     </CTableHeaderCell>
                     <CTableHeaderCell>
-                      STATUS <CIcon icon={cilSortNumericDown} />{' '}
+                      STATUS{' '}
+                      <CIcon
+                        icon={cilSortNumericDown}
+                        onClick={() => setSortedBy('status')}
+                        cursor="pointer"
+                      />{' '}
                       <CDropdown>
                         <CDropdownToggle color="secondary" size="sm" />
                         <CDropdownMenu>
@@ -162,7 +169,12 @@ const Tasks = () => {
                       </CDropdown>
                     </CTableHeaderCell>
                     <CTableHeaderCell>
-                      User <CIcon icon={cilSortNumericDown} />{' '}
+                      User{' '}
+                      <CIcon
+                        icon={cilSortNumericDown}
+                        onClick={() => setSortedBy('AssignedTo')}
+                        cursor="pointer"
+                      />{' '}
                       <CDropdown>
                         <CDropdownToggle color="secondary" size="sm" />
                         <CDropdownMenu>
