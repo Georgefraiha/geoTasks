@@ -1,51 +1,29 @@
 import React from 'react'
 
 import {
-  CAvatar,
-  CButton,
-  CButtonGroup,
   CCard,
   CCardBody,
-  CCardFooter,
-  CCardHeader,
   CCol,
-  CProgress,
   CRow,
   CTable,
   CTableBody,
-  CTableDataCell,
   CTableHead,
   CTableHeaderCell,
   CTableRow,
-  CFormInput,
 } from '@coreui/react'
 import { useState, useEffect, useRef } from 'react'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged } from 'firebase/auth'
 import CIcon from '@coreui/icons-react'
 import { db, auth } from '../../firebase.config'
 import { cilTask, cibAddthis } from '@coreui/icons'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { collection, getDocs, query, where, orderBy, limit, startAfter } from 'firebase/firestore'
+// import { useTable, useGlobalFilter, useFilters } from 'react-table'
+import { collection, getDocs, query, limit } from 'firebase/firestore'
 import ListingItem from 'src/components/ListingItem'
-const Tasks = () => {
-  // const [formData, setFormData] = useState({
-  //   type: 'rent',
-  //   name: '',
-  //   bedrooms: 1,
-  //   bathrooms: 1,
-  //   parking: false,
-  //   furnished: false,
-  //   address: '',
-  //   offer: false,
-  //   regularPrice: 0,
-  //   discountedPrice: 0,
-  //   images: {},
-  //   latitude: 0,
-  //   longitude: 0,
-  // })
 
+const Tasks = () => {
   const [listings, setListings] = useState([])
   const navigate = useNavigate()
   const isMounted = useRef(true)
@@ -55,8 +33,6 @@ const Tasks = () => {
         onAuthStateChanged(auth, (user) => {
           if (user) {
             console.log(user.uid)
-            //auth.signOut()
-            // setFormData({ ...formData, userRef: user.uid })
           } else {
             navigate('/login')
           }
@@ -69,7 +45,7 @@ const Tasks = () => {
     return () => {
       isMounted.current = false
     }
-  }, [isMounted])
+  }, [navigate, isMounted])
 
   useEffect(() => {
     const fetchListings = async () => {

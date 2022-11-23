@@ -1,4 +1,7 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import TaskType from 'src/components/TaskType'
+import { CFormSelect } from '@coreui/react'
+// import UsersSelect from 'src/components/UsersSelect'
 import {
   CButton,
   CCard,
@@ -9,12 +12,10 @@ import {
   CFormInput,
   CInputGroup,
   CInputGroupText,
-  CFormCheck,
   CRow,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
-  cilLockLocked,
   cilUser,
   cilDescription,
   cilAvTimer,
@@ -22,24 +23,22 @@ import {
   cilLineWeight,
   cilNotes,
 } from '@coreui/icons'
-
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { db } from '../../../firebase.config'
-import { setDoc, doc, serverTimestamp, collection, getDocs } from 'firebase/firestore'
+import { setDoc, doc } from 'firebase/firestore'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import nextId from 'react-id-generator'
+import { collection, getDocs, query, limit } from 'firebase/firestore'
 
 const Task = () => {
   const [formData, setFormData] = useState({
     Description: '',
     AssignedTo: '',
-    DevType: '',
+    DevType: 1,
     ElapsedTime: '',
     RequiredTime: '',
-    status: '',
+    status: 0,
     weight: '',
     Remark: '',
   })
@@ -50,8 +49,73 @@ const Task = () => {
   // Set with cityConverter
 
   const navigate = useNavigate()
+  const [listings, setListings] = useState([])
+  const [userList, setUserList] = useState([])
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        // Get reference
+        const listingsRef = collection(db, 'tasktype')
+
+        // Create a query
+        const q = query(listingsRef, limit(10))
+
+        // Execute query
+        const querySnap = await getDocs(q)
+
+        // const lastVisible = querySnap.docs[querySnap.docs.length - 1]
+        // setLastFetchedListing(lastVisible)
+
+        const listings = []
+
+        querySnap.forEach((doc) => {
+          return listings.push({
+            id: doc.id,
+            data: doc.data(),
+          })
+        })
+
+        setListings(listings)
+      } catch (error) {}
+    }
+
+    const fetchUsers = async () => {
+      try {
+        // Get reference
+        const listingsRef = collection(db, 'users')
+
+        // Create a query
+        const q = query(listingsRef, limit(10))
+
+        // Execute query
+        const querySnap = await getDocs(q)
+
+        // const lastVisible = querySnap.docs[querySnap.docs.length - 1]
+        // setLastFetchedListing(lastVisible)
+
+        const userList = []
+
+        querySnap.forEach((doc) => {
+          return userList.push({
+            id: doc.id,
+            data: doc.data(),
+          })
+        })
+
+        setUserList(userList)
+      } catch (error) {}
+    }
+    fetchTasks()
+    fetchUsers()
+  }, [])
 
   const onChange = (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }))
+  }
+  const onChangeSelect = (e) => {
     setFormData((prevState) => ({
       ...prevState,
       [e.target.id]: e.target.value,
@@ -61,8 +125,9 @@ const Task = () => {
   const onSubmit = async (e) => {
     e.preventDefault()
     const uniqueId = nextId()
-    console.log(uniqueId)
+    console.log(AssignedTo)
     const ref = doc(db, 'tasks', uniqueId)
+
     await setDoc(ref, formData)
     navigate('/')
   }
@@ -92,21 +157,34 @@ const Task = () => {
                     <CInputGroupText>
                       <CIcon icon={cilUser} />
                     </CInputGroupText>
-                    <CFormInput
+                    <CFormSelect
+                      aria-label="Default select example"
                       id="AssignedTo"
-                      placeholder="AssignedTo userId"
-                      value={AssignedTo}
                       onChange={onChange}
-                    />
+                    >
+                      {userList.map((listing) => (
+                        <option value={listing.id} key={listing.id}>
+                          {listing.data.name}
+                        </option>
+                      ))}
+                    </CFormSelect>
+                    {/* <UsersSelect id="AssignedTo" value={AssignedTo} onChange={onChangeSelect} /> */}
                   </CInputGroup>
                   <CInputGroup className="mb-3 ">
-                    <CInputGroupText className="ml-3">T</CInputGroupText>
-                    <CFormInput
+                    <CInputGroupText>TYPE</CInputGroupText>
+                    <CFormSelect
+                      htmlSize={2}
+                      aria-label="size 2 select example"
                       id="DevType"
-                      placeholder="TaskType"
-                      value={DevType}
                       onChange={onChange}
-                    />
+                    >
+                      {listings.map((listing) => (
+                        <option value={listing.id} key={listing.id}>
+                          {listing.data.tasktype}
+                        </option>
+                      ))}
+                    </CFormSelect>
+                    {/* <TaskType id="DevType" data={DevType} onChange={onChangeSelect} /> */}
                   </CInputGroup>
 
                   <CInputGroup className="mb-3">
@@ -136,12 +214,15 @@ const Task = () => {
                     <CInputGroupText>
                       <CIcon icon={cilBellExclamation} />
                     </CInputGroupText>
-                    <CFormInput
+                    <CFormSelect
+                      aria-label="Default select example"
                       id="status"
-                      placeholder="status 0 / 1"
                       value={status}
-                      onChange={onChange}
-                    />
+                      onChange={onChangeSelect}
+                    >
+                      <option value="0">Pending</option>
+                      <option value="1">Completed</option>
+                    </CFormSelect>
                   </CInputGroup>
                   <CInputGroup className="mb-4">
                     <CInputGroupText>
