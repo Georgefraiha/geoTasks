@@ -30,19 +30,25 @@ import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 // import { useTable, useGlobalFilter, useFilters } from 'react-table'
-import { collection, getDocs, query, limit, orderBy } from 'firebase/firestore'
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore'
 import ListingItem from 'src/components/ListingItem'
 
 const Tasks = () => {
   const [listings, setListings] = useState([])
-  const [descSearch, setDecSearch] = useState('')
-  const [statusSearch, setStatSearch] = useState('')
-  const [userSearch, setUserSearch] = useState('')
-  const [sortedby, setSortedBy] = useState()
+  const [searchField, setSearch] = useState('AssignedTo')
+  const [operator, setOperator] = useState('!=')
+  const [searchValue, setValue] = useState('')
+
+  const [sortedby, setSortedBy] = useState(null)
   const navigate = useNavigate()
   const isMounted = useRef(true)
   const [userList, setUserList] = useState([])
-
+  const onClick1 = (field, value, op) => {
+    setSearch(field)
+    setValue(value)
+    setOperator(op)
+    console.log(field + op + value)
+  }
   useEffect(() => {
     if (isMounted) {
       try {
@@ -70,8 +76,13 @@ const Tasks = () => {
         const listingsRef = collection(db, 'tasks')
         var q
         // Create a query
-        if (sortedby === 'status') q = query(listingsRef, orderBy('status', 'asc'))
-        else q = query(listingsRef)
+        sortedby
+          ? (q = query(
+              listingsRef,
+              orderBy(sortedby, 'asc'),
+              where(searchField, operator, searchValue),
+            ))
+          : (q = query(listingsRef, where(searchField, operator, searchValue)))
 
         // Execute query
         const querySnap = await getDocs(q)
@@ -97,7 +108,7 @@ const Tasks = () => {
     }
 
     fetchListings()
-  }, [sortedby])
+  }, [sortedby, searchField, operator, searchValue])
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -163,8 +174,15 @@ const Tasks = () => {
                       <CDropdown>
                         <CDropdownToggle color="secondary" size="sm" />
                         <CDropdownMenu>
-                          <CDropdownItem href="#">Pending</CDropdownItem>
-                          <CDropdownItem href="#">Completed</CDropdownItem>
+                          <CDropdownItem onClick={() => onClick1('status', 3, '!=')}>
+                            All
+                          </CDropdownItem>
+                          <CDropdownItem onClick={() => onClick1('status', 0, '==')}>
+                            Pending
+                          </CDropdownItem>
+                          <CDropdownItem onClick={() => onClick1('status', 1, '==')}>
+                            Completed
+                          </CDropdownItem>
                         </CDropdownMenu>
                       </CDropdown>
                     </CTableHeaderCell>
@@ -178,8 +196,14 @@ const Tasks = () => {
                       <CDropdown>
                         <CDropdownToggle color="secondary" size="sm" />
                         <CDropdownMenu>
+                          <CDropdownItem onClick={() => onClick1('AssignedTo', 1000, '!=')}>
+                            All Accounts
+                          </CDropdownItem>
                           {userList.map((listing) => (
-                            <CDropdownItem key={listing.id} href="#">
+                            <CDropdownItem
+                              key={listing.id}
+                              onClick={() => onClick1('AssignedTo', listing.id, '==')}
+                            >
                               {listing.data.email}
                             </CDropdownItem>
                           ))}
