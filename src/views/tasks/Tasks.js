@@ -15,12 +15,14 @@ import {
   CDropdownMenu,
   CDropdownItem,
   CFormInput,
+  CInputGroup,
+  CInputGroupText,
 } from '@coreui/react'
 
 import { onAuthStateChanged } from 'firebase/auth'
 import CIcon from '@coreui/icons-react'
 import { db, auth } from '../../firebase.config'
-import { cilTask, cibAddthis, cilSortNumericDown } from '@coreui/icons'
+import { cilTask, cibAddthis, cilSortNumericDown, cilSearch } from '@coreui/icons'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -49,12 +51,16 @@ const Tasks = () => {
 
   const handleChange = (e) => {
     setDesc(e.target.value)
+  }
+
+  const handleSearch = (e) => {
     setValue(searchText)
     setSortedBy('')
     setSearch('Description')
     setOperator('==')
     console.log(searchField + operator + searchValue)
   }
+
   useEffect(() => {
     if (isMounted) {
       try {
@@ -165,12 +171,18 @@ const Tasks = () => {
                       <CDropdown autoClose="outside" direction="dropend">
                         <CDropdownToggle color="secondary" size="sm" />
                         <CDropdownMenu>
-                          <CFormInput
-                            type="text"
-                            id="descSearch"
-                            value={searchText}
-                            onChange={handleChange}
-                          />
+                          <CInputGroup className="mb-3">
+                            Search Description
+                            <CInputGroupText>
+                              <CIcon type="button" icon={cilSearch} onClick={handleSearch} />
+                            </CInputGroupText>
+                            <CFormInput
+                              id="descSearch"
+                              placeholder="Search desc"
+                              alue={searchText}
+                              onChange={handleChange}
+                            />
+                          </CInputGroup>
                         </CDropdownMenu>
                       </CDropdown>
                     </CTableHeaderCell>
