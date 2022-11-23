@@ -10,12 +10,22 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  CDropdownToggle,
+  CDropdown,
+  CDropdownMenu,
+  CDropdownItem,
+  CFormInput,
+  CFormLabel,
+  CForm,
+  CButton,
+  CDropdownDivider,
 } from '@coreui/react'
+
 import { useState, useEffect, useRef } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import CIcon from '@coreui/icons-react'
 import { db, auth } from '../../firebase.config'
-import { cilTask, cibAddthis } from '@coreui/icons'
+import { cilTask, cibAddthis, cilSortNumericDown, cilChevronCircleDownAlt } from '@coreui/icons'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -25,8 +35,13 @@ import ListingItem from 'src/components/ListingItem'
 
 const Tasks = () => {
   const [listings, setListings] = useState([])
+  const [descSearch, setDecSearch] = useState('')
+  const [statusSearch, setStatSearch] = useState('')
+  const [userSearch, setUserSearch] = useState('')
+  const [sortedby, setSortedBy] = useState('')
   const navigate = useNavigate()
   const isMounted = useRef(true)
+  const [userList, setUserList] = useState([])
   useEffect(() => {
     if (isMounted) {
       try {
@@ -73,7 +88,7 @@ const Tasks = () => {
 
         setListings(listings)
 
-        console.log(listings)
+        //console.log(listings)
       } catch (error) {
         toast.error('Could not fetch listings')
       }
@@ -81,6 +96,36 @@ const Tasks = () => {
 
     fetchListings()
   }, [])
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        // Get reference
+        const listingsRef = collection(db, 'users')
+
+        // Create a query
+        const q = query(listingsRef, limit(10))
+
+        // Execute query
+        const querySnap = await getDocs(q)
+
+        // const lastVisible = querySnap.docs[querySnap.docs.length - 1]
+        // setLastFetchedListing(lastVisible)
+
+        const userList = []
+
+        querySnap.forEach((doc) => {
+          return userList.push({
+            id: doc.id,
+            data: doc.data(),
+          })
+        })
+
+        setUserList(userList)
+      } catch (error) {}
+    }
+    fetchUsers()
+  })
 
   return (
     <>
@@ -97,9 +142,38 @@ const Tasks = () => {
                       <CIcon icon={cilTask} />
                     </CTableHeaderCell>
                     <CTableHeaderCell>TASKID</CTableHeaderCell>
-                    <CTableHeaderCell>DESC</CTableHeaderCell>
-                    <CTableHeaderCell>STATUS</CTableHeaderCell>
-                    <CTableHeaderCell>User</CTableHeaderCell>
+                    <CTableHeaderCell>
+                      DESC
+                      <CDropdown autoClose="outside">
+                        <CDropdownToggle color="secondary" size="sm" />
+                        <CDropdownMenu>
+                          <CFormInput type="text" id="statusSearch" />
+                        </CDropdownMenu>
+                      </CDropdown>
+                    </CTableHeaderCell>
+                    <CTableHeaderCell>
+                      STATUS <CIcon icon={cilSortNumericDown} />{' '}
+                      <CDropdown>
+                        <CDropdownToggle color="secondary" size="sm" />
+                        <CDropdownMenu>
+                          <CDropdownItem href="#">Pending</CDropdownItem>
+                          <CDropdownItem href="#">Completed</CDropdownItem>
+                        </CDropdownMenu>
+                      </CDropdown>
+                    </CTableHeaderCell>
+                    <CTableHeaderCell>
+                      User <CIcon icon={cilSortNumericDown} />{' '}
+                      <CDropdown>
+                        <CDropdownToggle color="secondary" size="sm" />
+                        <CDropdownMenu>
+                          {userList.map((listing) => (
+                            <CDropdownItem key={listing.id} href="#">
+                              {listing.data.email}
+                            </CDropdownItem>
+                          ))}
+                        </CDropdownMenu>
+                      </CDropdown>
+                    </CTableHeaderCell>
                     <CTableHeaderCell>EDIT </CTableHeaderCell>
                     <CTableHeaderCell>
                       <Link to="/task">

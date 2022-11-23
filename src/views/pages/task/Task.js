@@ -164,7 +164,7 @@ const Task = () => {
                     >
                       {userList.map((listing) => (
                         <option value={listing.id} key={listing.id}>
-                          {listing.data.name}
+                          {listing.data.email}
                         </option>
                       ))}
                     </CFormSelect>
