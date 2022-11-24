@@ -30,7 +30,7 @@ function ListingItem({ listing, id, onEdit, onDelete }) {
   return (
     <CTableRow v-for="item in tableItems">
       <CTableDataCell>
-        <CIcon icon={cilTask} className="text-danger" />
+        <CIcon icon={cilTask} className={listing.status ? 'text-success' : 'text-danger'} />
       </CTableDataCell>
       <CTableDataCell>{id}</CTableDataCell>
       <CTableDataCell>{listing.Description}</CTableDataCell>
