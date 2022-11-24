@@ -23,19 +23,9 @@ import { collection, getDocs, query, where, orderBy, limit, startAfter } from 'f
 import ListingUsers from 'src/components/ListingUsers'
 const Users = () => {
   const [formData, setFormData] = useState({
-    type: 'rent',
+    email: 'rent',
     name: '',
-    bedrooms: 1,
-    bathrooms: 1,
-    parking: false,
-    furnished: false,
-    address: '',
-    offer: false,
-    regularPrice: 0,
-    discountedPrice: 0,
-    images: {},
-    latitude: 0,
-    longitude: 0,
+    admin: false,
   })
 
   const [listings, setListings] = useState([])

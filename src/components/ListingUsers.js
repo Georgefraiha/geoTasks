@@ -13,7 +13,7 @@ function ListingUsers({ listing, id, onEdit, onDelete }) {
       <CTableDataCell>{id}</CTableDataCell>
       <CTableDataCell>{listing.name}</CTableDataCell>
       <CTableDataCell>{listing.email}</CTableDataCell>
-      <CTableDataCell>{listing.admin}</CTableDataCell>
+      <CTableDataCell>{listing.admin ? 'admin' : 'guest'}</CTableDataCell>
 
       <CTableDataCell>
         <CIcon icon={cilPencil} onClick={() => onEdit(id)} className="text-primary" />
