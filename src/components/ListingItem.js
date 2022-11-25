@@ -37,13 +37,19 @@ function ListingItem({ listing, id, onEdit, onDelete }) {
       <CTableDataCell>{listing.status ? 'Completed' : 'Pending'}</CTableDataCell>
       <CTableDataCell>{listings}</CTableDataCell>
       <CTableDataCell>
-        <CIcon icon={cilPencil} onClick={() => onEdit(id)} className="text-primary" />
+        <CIcon
+          icon={cilPencil}
+          onClick={() => onEdit(id)}
+          className="text-primary"
+          cursor="pointer"
+        />
       </CTableDataCell>
       <CTableDataCell>
         <CIcon
           icon={cilTrash}
           onClick={() => onDelete(listing.id, listing.Description)}
           className="text-danger"
+          cursor="pointer"
         />
       </CTableDataCell>
     </CTableRow>

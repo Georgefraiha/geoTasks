@@ -1,5 +1,5 @@
 import React from 'react'
-
+import axios from 'axios'
 import {
   CCard,
   CCardBody,
@@ -27,10 +27,23 @@ const Users = () => {
     name: '',
     admin: false,
   })
-
+  const url =
+    'https://firestore.googleapis.com/v1/projects/geotasks-fede4/databases/(default)/documents/users'
   const [listings, setListings] = useState([])
+  const [persons, setPersons] = useState([])
   const navigate = useNavigate()
   const isMounted = useRef(true)
+
+  const listUsers = () => {
+    axios.get(url).then((res) => {
+      persons.push(res.data.documents)
+      //console.log(persons[0])
+      persons[0].forEach((listing) => console.log(listing.fields.email.stringValue))
+
+      // this.setState({ persons })
+    })
+  }
+
   useEffect(() => {
     if (isMounted) {
       try {
@@ -79,12 +92,12 @@ const Users = () => {
 
         setListings(listings)
 
-        console.log(listings)
+        // console.log(listings)
       } catch (error) {
         toast.error('Could not fetch listings')
       }
     }
-
+    listUsers()
     fetchListings()
   }, [])
 
@@ -108,7 +121,7 @@ const Users = () => {
                     <CTableHeaderCell>ADMIN</CTableHeaderCell>
                     <CTableHeaderCell>EDIT </CTableHeaderCell>
                     <CTableHeaderCell>
-                      <Link to={`/register`} activeClassName="active">
+                      <Link to={`/register`} className="active">
                         <CIcon icon={cibAddthis} className="text-danger" />
                       </Link>
                     </CTableHeaderCell>
