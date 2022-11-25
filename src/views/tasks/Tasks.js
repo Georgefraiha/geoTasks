@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-
+import axios from 'axios'
 import {
   CCard,
   CCardBody,
@@ -40,7 +40,9 @@ const Tasks = () => {
   const navigate = useNavigate()
   const isMounted = useRef(true)
   const [userList, setUserList] = useState([])
-
+  const [allTasks, setTasks] = useState([])
+  const url =
+    'https://firestore.googleapis.com/v1/projects/geotasks-fede4/databases/(default)/documents/tasks'
   const onClick1 = (field, value, op) => {
     setSearch(field)
     setValue(value)
@@ -61,6 +63,24 @@ const Tasks = () => {
     console.log(searchField + operator + searchValue)
   }
 
+  const listTasks = () => {
+    axios.get(url).then((res) => {
+      allTasks.push(res.data.documents)
+      // console.log(persons[0])
+      allTasks[0].forEach((listing) => {
+        listings.push({
+          id: listing.name.replace(/^.*[\\\/]/, ''),
+          name: listing.fields.name.stringValue,
+          email: listing.fields.email.stringValue,
+          admin: listing.fields.admin.booleanValue,
+        })
+        // console.log(listing.name.replace(/^.*[\\\/]/, ''))
+      })
+      setListings(listings)
+      //console.log(listings)
+      // this.setState({ persons })
+    })
+  }
   useEffect(() => {
     if (isMounted) {
       try {

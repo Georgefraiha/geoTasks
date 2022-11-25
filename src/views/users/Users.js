@@ -37,9 +37,18 @@ const Users = () => {
   const listUsers = () => {
     axios.get(url).then((res) => {
       persons.push(res.data.documents)
-      //console.log(persons[0])
-      persons[0].forEach((listing) => console.log(listing.fields.email.stringValue))
-
+      // console.log(persons[0])
+      persons[0].forEach((listing) => {
+        listings.push({
+          id: listing.name.replace(/^.*[\\\/]/, ''),
+          name: listing.fields.name.stringValue,
+          email: listing.fields.email.stringValue,
+          admin: listing.fields.admin.booleanValue,
+        })
+        // console.log(listing.name.replace(/^.*[\\\/]/, ''))
+      })
+      setListings(listings)
+      //console.log(listings)
       // this.setState({ persons })
     })
   }
@@ -98,7 +107,7 @@ const Users = () => {
       }
     }
     listUsers()
-    fetchListings()
+    //fetchListings()
   }, [])
 
   return (
@@ -129,7 +138,13 @@ const Users = () => {
                 </CTableHead>
                 <CTableBody>
                   {listings.map((listing) => (
-                    <ListingUsers listing={listing.data} id={listing.id} key={listing.id} />
+                    <ListingUsers
+                      name={listing.name}
+                      email={listing.email}
+                      id={listing.id}
+                      admin={listing.admin}
+                      key={listing.id}
+                    />
                   ))}
                 </CTableBody>
               </CTable>
